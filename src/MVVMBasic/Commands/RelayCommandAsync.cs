@@ -7,21 +7,21 @@ using System.Windows.Input;
 
 namespace MVVMBasic.Commands
 {
-    public class RelayCommandAsync : RelayCommandAsync<object>
+    public class AsyncRelayCommand : AsyncRelayCommand<object>
     {
-        public RelayCommandAsync(Func<object, Task> execute)
+        public AsyncRelayCommand(Func<object, Task> execute)
             : this(execute, null)
         {
         }
 
-        public RelayCommandAsync(Func<object, Task> asyncExecute,
+        public AsyncRelayCommand(Func<object, Task> asyncExecute,
                        Predicate<object> canExecute)
             : base(asyncExecute, canExecute)
         {
         }
     }
 
-    public class RelayCommandAsync<T> : ICommand
+    public class AsyncRelayCommand<T> : ICommand
     {
         protected readonly Predicate<object> _canExecute;
         protected Func<T, Task> _asyncExecute;
@@ -45,12 +45,12 @@ namespace MVVMBasic.Commands
             }
         }
 
-        public RelayCommandAsync(Func<T, Task> execute)
+        public AsyncRelayCommand(Func<T, Task> execute)
             : this(execute, null)
         {
         }
 
-        public RelayCommandAsync(Func<T, Task> asyncExecute,
+        public AsyncRelayCommand(Func<T, Task> asyncExecute,
                        Predicate<object> canExecute)
         {
             _asyncExecute = asyncExecute;

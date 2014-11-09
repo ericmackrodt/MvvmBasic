@@ -16,9 +16,9 @@ namespace MVVMBasic
     [DataContract]
     public abstract class BaseViewModel : INotifyPropertyChanged
     {
-        protected IConnectionVerify connection;
-        protected event AsyncExecutionEventHandler OnLoad;
         public event PropertyChangedEventHandler PropertyChanged;
+
+        protected event AsyncExecutionEventHandler OnLoad;
 
         private bool isBusy;
         [DataMember]
@@ -44,9 +44,9 @@ namespace MVVMBasic
             }
         }
 
-        public BaseViewModel(IConnectionVerify connectionVerify)
+        public BaseViewModel()
         {
-            connection = connectionVerify;
+
         }
 
         public async virtual Task Load(object arg)
@@ -59,6 +59,17 @@ namespace MVVMBasic
         {
             if (PropertyChanged != null)
                 PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+        }
+    }
+
+    [DataContract]
+    public abstract class ConnectionVerifyBaseViewModel : BaseViewModel
+    {
+        protected IConnectionVerify connection;
+
+        public ConnectionVerifyBaseViewModel(IConnectionVerify connectionVerify)
+        {
+            connection = connectionVerify;
         }
 
         protected async Task<TResult> ConnectionVerifyCall<TResult, TInput>(Func<TInput, Task<TResult>> call, TInput input, Action catchAction = null)
@@ -159,30 +170,6 @@ namespace MVVMBasic
             {
                 await connection.VerifyConnectionException(exception);
             }
-        }
-    }
-
-    [DataContract]
-    public abstract class BaseViewModel<TViewModel> : BaseViewModel where TViewModel : BaseViewModel<TViewModel>
-    {
-        public BaseViewModel(IConnectionVerify connectionVerify) : base(connectionVerify) { } 
-
-        private string GetProperty(Expression<Func<TViewModel, object>> func)
-        {
-            var body = func.Body;
-            if (body.NodeType == ExpressionType.Convert)
-                body = ((UnaryExpression)body).Operand;
-            var property = (body as MemberExpression).Member.Name;
-            return property;
-        }
-
-        public virtual void NotifyChanged(Expression<Func<TViewModel, object>> func)
-        {
-            //var regexProperty = @"(.+ => )?(Convert\(.+ => )?.+\.(?<Property>\w+)\)?";
-            //var property = Regex.Match(func.Body.ToString(), regexProperty).Groups["Property"].Value;
-            var property = GetProperty(func);
-
-            NotifyChanged(property);
         }
     }
 }
