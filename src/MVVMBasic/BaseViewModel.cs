@@ -1,24 +1,18 @@
-﻿using MVVMBasic.Services;
+﻿using MVVMBasic.Commands;
+using MVVMBasic.Services;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
-using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace MVVMBasic
 {
-    public delegate Task AsyncExecutionEventHandler(object parameter);
-
     [DataContract]
     public abstract class BaseViewModel : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
-
-        protected event AsyncExecutionEventHandler OnLoad;
 
         private bool isBusy;
         [DataMember]
@@ -44,15 +38,20 @@ namespace MVVMBasic
             }
         }
 
-        public BaseViewModel()
+        private ICommand _loadDataCommand;
+        public ICommand LoadDataCommand
         {
-
+            get { return _loadDataCommand; }
         }
 
-        public async virtual Task Load(object arg)
+        public BaseViewModel()
         {
-            if (OnLoad != null)
-                await OnLoad(arg);
+            _loadDataCommand = new AsyncRelayCommand(LoadData);
+        }
+
+        public async virtual Task LoadData(object arg)
+        {
+            IsDataLoaded = true;
         }
 
         public virtual void NotifyChanged([CallerMemberName]string propertyName = null)
