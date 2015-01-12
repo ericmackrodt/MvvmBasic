@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <title>$title$</title>
+    <authors>$author$</authors>
+    <owners>$author$</owners>
+    <projectUrl>https://github.com/ericmackrodt/MVVMBasic</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>$description$</description>
+    <copyright>Copyright (C) Eric Mackrodt 2015</copyright>
+    <tags>MVVM WPF Windows Phone RT WinRT</tags>
+  </metadata>
+</package>
