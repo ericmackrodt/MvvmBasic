@@ -13,14 +13,30 @@ namespace MVVMBasic.Commands
             : base(handler)
         {
         }
+
+        public RelayCommand(Action<object> handler,
+                            Action<Exception> exceptionWrapper)
+            : base(handler, exceptionWrapper)
+
+        {
+        }
     }
 
     public class RelayCommand<T> : ICommand
     {
         private Action<T> _handler;
+        private Action<Exception> _exceptionWrapper;
+
         public RelayCommand(Action<T> handler)
+            : this (handler, null)
+        {
+        }
+
+        public RelayCommand(Action<T> handler,
+                            Action<Exception> exceptionWrapper)
         {
             _handler = handler;
+            _exceptionWrapper = exceptionWrapper;
             IsEnabled = true;
         }
 
@@ -50,6 +66,20 @@ namespace MVVMBasic.Commands
 
         public void Execute(object parameter)
         {
+            if (_exceptionWrapper != null)
+            {
+                try
+                {
+                    _handler((T)parameter);
+                }
+                catch (Exception ex)
+                {
+                    _exceptionWrapper(ex);
+                }
+
+                return;
+            }
+
             _handler((T)parameter);
         }
     }

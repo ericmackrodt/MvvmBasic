@@ -1,8 +1,6 @@
 ﻿using MVVMBasic.Commands;
 using MVVMBasic.Services;
 using System;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -10,10 +8,8 @@ using System.Windows.Input;
 namespace MVVMBasic
 {
     [DataContract]
-    public abstract class BaseViewModel : INotifyPropertyChanged
+    public abstract class BaseViewModel : ObservableModel
     {
-        public event PropertyChangedEventHandler PropertyChanged;
-
         private bool isBusy;
         [DataMember]
         public virtual bool IsBusy
@@ -46,129 +42,13 @@ namespace MVVMBasic
 
         public BaseViewModel()
         {
-            _loadDataCommand = new AsyncRelayCommand(LoadData);
+            _loadDataCommand = new RelayCommandAsync(LoadData);
         }
 
-        public async virtual Task LoadData(object arg)
+        public virtual Task LoadData(object arg)
         {
             IsDataLoaded = true;
-        }
-
-        public virtual void NotifyChanged([CallerMemberName]string propertyName = null)
-        {
-            if (PropertyChanged != null)
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-        }
-    }
-
-    [DataContract]
-    public abstract class ConnectionVerifyBaseViewModel : BaseViewModel
-    {
-        protected IConnectionVerify connection;
-
-        public ConnectionVerifyBaseViewModel(IConnectionVerify connectionVerify)
-        {
-            connection = connectionVerify;
-        }
-
-        protected async Task<TResult> ConnectionVerifyCall<TResult, TInput>(Func<TInput, Task<TResult>> call, TInput input, Action catchAction = null)
-        {
-            if (!connection.HasInternetConnection())
-                return default(TResult);
-
-            Exception exception = null;
-
-            try
-            {
-                return await call(input);
-            }
-            catch (Exception ex)
-            {
-                exception = ex;
-                if (catchAction != null)
-                    catchAction();
-            }
-
-            if (exception != null)
-            {
-                await connection.VerifyConnectionException(exception);
-            }
-
-            return default(TResult);
-        }
-
-        protected async Task<T> ConnectionVerifyCall<T>(Func<Task<T>> call, Action catchAction = null)
-        {
-            if (!connection.HasInternetConnection())
-                return default(T);
-
-            Exception exception = null;
-
-            try
-            {
-                return await call();
-            }
-            catch (Exception ex)
-            {
-                exception = ex;
-                if (catchAction != null)
-                    catchAction();
-            }
-
-            if (exception != null)
-            {
-                await connection.VerifyConnectionException(exception);
-            }
-
-            return default(T);
-        }
-
-        protected async Task ConnectionVerifyCall(Func<Task> call, Action catchAction = null)
-        {
-            if (!connection.HasInternetConnection())
-                return;
-
-            Exception exception = null;
-
-            try
-            {
-                await call();
-            }
-            catch (Exception ex)
-            {
-                exception = ex;
-                if (catchAction != null)
-                    catchAction();
-            }
-
-            if (exception != null)
-            {
-                await connection.VerifyConnectionException(exception);
-            }
-        }
-
-        protected async Task ConnectionVerifyCall<T>(Func<T, Task> call, T input, Action catchAction = null)
-        {
-            if (!connection.HasInternetConnection())
-                return;
-
-            Exception exception = null;
-
-            try
-            {
-                await call(input);
-            }
-            catch (Exception ex)
-            {
-                exception = ex;
-                if (catchAction != null)
-                    catchAction();
-            }
-
-            if (exception != null)
-            {
-                await connection.VerifyConnectionException(exception);
-            }
+            return null;
         }
     }
 }

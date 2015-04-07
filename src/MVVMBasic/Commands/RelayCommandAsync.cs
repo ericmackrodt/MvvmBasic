@@ -7,23 +7,23 @@ using System.Windows.Input;
 
 namespace MVVMBasic.Commands
 {
-    public class AsyncRelayCommand : AsyncRelayCommand<object>
+    public class RelayCommandAsync : RelayCommandAsync<object>
     {
-        public AsyncRelayCommand(Func<object, Task> execute)
+        public RelayCommandAsync(Func<object, Task> execute)
             : this(execute, null)
         {
         }
 
-        public AsyncRelayCommand(Func<object, Task> asyncExecute,
-                       Predicate<object> canExecute)
-            : base(asyncExecute, canExecute)
+        public RelayCommandAsync(Func<object, Task> asyncExecute,
+                                Action<Exception> exceptionWrapper)
+            : base(asyncExecute, exceptionWrapper)
         {
         }
     }
 
-    public class AsyncRelayCommand<T> : ICommand
+    public class RelayCommandAsync<T> : ICommand
     {
-        protected readonly Predicate<object> _canExecute;
+        private Action<Exception> _exceptionWrapper;
         protected Func<T, Task> _asyncExecute;
 
         public event EventHandler CanExecuteChanged;
@@ -45,16 +45,16 @@ namespace MVVMBasic.Commands
             }
         }
 
-        public AsyncRelayCommand(Func<T, Task> execute)
+        public RelayCommandAsync(Func<T, Task> execute)
             : this(execute, null)
         {
         }
 
-        public AsyncRelayCommand(Func<T, Task> asyncExecute,
-                       Predicate<object> canExecute)
+        public RelayCommandAsync(Func<T, Task> asyncExecute,
+                            Action<Exception> exceptionWrapper)
         {
             _asyncExecute = asyncExecute;
-            _canExecute = canExecute;
+            _exceptionWrapper = exceptionWrapper;
             IsEnabled = true;
         }
 
@@ -65,6 +65,20 @@ namespace MVVMBasic.Commands
 
         public async void Execute(object parameter)
         {
+            if (_exceptionWrapper != null)
+            {
+                try
+                {
+                    await ExecuteAsync((T)parameter);
+                }
+                catch (Exception ex)
+                {
+                    _exceptionWrapper(ex);
+                }
+
+                return;
+            }
+
             await ExecuteAsync((T)parameter);
         }
 
